@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,21 +7,14 @@
     <title>Monitor ONU - Inteligencia Geopolítica</title>
     <style>
         :root {
-            --bg-body: #0f172a;
-            /* Slate 900 */
-            --bg-card: #1e293b;
-            /* Slate 800 */
-            --text-main: #f1f5f9;
-            /* Slate 100 */
-            --text-muted: #94a3b8;
-            /* Slate 400 */
-            --border: #334155;
-            /* Slate 700 */
-            --accent: #38bdf8;
-            /* Sky 400 */
+            --bg-body: #0f172a;       /* Slate 900 */
+            --bg-card: #1e293b;       /* Slate 800 */
+            --text-main: #f1f5f9;     /* Slate 100 */
+            --text-muted: #94a3b8;    /* Slate 400 */
+            --border: #334155;        /* Slate 700 */
+            --accent: #38bdf8;        /* Sky 400 */
             --accent-glow: rgba(56, 189, 248, 0.15);
-            --success: #34d399;
-            /* Emerald 400 */
+            --success: #34d399;       /* Emerald 400 */
             --font-main: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
 
@@ -88,9 +80,7 @@
         .report-card::before {
             content: "";
             position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
+            left: 0; top: 0; bottom: 0;
             width: 4px;
             background: var(--accent);
             opacity: 0.8;
@@ -121,18 +111,11 @@
             display: flex;
             align-items: center;
         }
-
+        
         .content h3::before {
             content: "▹";
             margin-right: 8px;
             color: var(--accent);
-        }
-
-        .content h4 {
-            color: var(--text-main);
-            font-size: 1rem;
-            margin-top: 16px;
-            margin-bottom: 8px;
         }
 
         .content p {
@@ -141,59 +124,74 @@
         }
 
         .content strong {
-            color: var(--success);
-            /* Resalta datos clave en verde */
+            color: var(--success); /* Resalta datos clave en verde */
             font-weight: 600;
         }
-
+        
         /* Diagnóstico final destacado */
         .content p:last-child strong {
-            color: #fbbf24;
-            /* Amber para la conclusión */
+            color: #fbbf24; /* Amber para la conclusión */
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Mobile */
         @media (max-width: 600px) {
-            body {
-                padding: 12px;
-            }
-
-            .header h1 {
-                font-size: 1.5rem;
-            }
-
-            .report-card {
-                padding: 20px;
-                border-radius: 12px;
-            }
+            body { padding: 12px; }
+            .header h1 { font-size: 1.5rem; }
+            .report-card { padding: 20px; border-radius: 12px; }
         }
     </style>
 </head>
-
 <body>
     <div class="container">
         <div class="header">
             <h1>Monitor ONU 2026</h1>
-            <p>Análisis de Riesgos Geopolíticos & Tecnológicos Estratégicos</p>
+            <p>Análisis de Riesgos Geopolíticos &amp; Tecnológicos Estratégicos</p>
         </div>
-
+        
         <div id="archive">
             <!-- MR_REPORTS_START -->
+<!-- MR_REPORT_CARD_START -->
+        <div class="report-card">
+            <div class="timestamp">REPORTE GENERADO: 05-Feb-2026 16:48 UTC</div>
+            <div class="content">
+                <div class="report-section">
+  <h3>🚨 Resumen Ejecutivo (BLUF)</h3>
+  <p>La parálisis del Consejo de Seguridad de la ONU (CSNU) ha alcanzado un punto de ruptura con la propuesta unilateral de EE. UU. de crear un "Consejo de Paz" paralelo, mientras que la integración masiva de enjambres de drones autónomos por parte del Ejército de EE. UU. y la despriorización de la ética en la IA de defensa marcan el inicio de una era de seguridad post-multilateral.</p>
+  
+  <h3>🔍 Análisis de las Últimas 24h</h3>
+  <h4>1. Termómetro Político (Consejo de Seguridad)</h4>
+  <p><strong>Evento:</strong> Debate sobre la ineficacia del veto tras la intervención unilateral en Venezuela y la propuesta de una "Junta de Paz" (Board of Peace) liderada por EE. UU. para eludir el CSNU.</p>
+  <p><strong>Impacto:</strong> El sistema de seguridad colectiva se fragmenta. La reducción del 25% en el presupuesto de mantenimiento de la paz de la ONU (debido a recortes de 1.000 millones de dólares por parte de la administración Trump en 2025) ha dejado a las misiones actuales en un estado de vulnerabilidad operativa crítica.</p>
+  
+  <h4>2. Frente Humanitario</h4>
+  <p><strong>Estado:</strong> Crítico. A pesar de la reapertura limitada del cruce de Rafah (2 de febrero), OCHA y UNRWA reportan una crisis de mortalidad por hipotermia en Gaza (11 niños fallecidos recientemente). La parálisis financiera de la ONU amenaza con el colapso total de la asistencia en Sudán y Yemen, donde las reuniones del Consejo de este mes se centrarán en la "eficiencia de costos" más que en la expansión de la ayuda.</p>
+  
+  <h4>3. Vigilancia Tecnológica (El Catalizador)</h4>
+  <p><strong>Hallazgos:</strong> El Ejército de EE. UU. seleccionó hoy (5 de febrero) a <strong>Swarmbotics AI</strong> para el despliegue de enjambres de robots autónomos de bajo costo. Simultáneamente, concluye la cumbre <strong>REAIM 2026</strong> en España, destacando una tendencia alarmante: la nueva estrategia de aceleración de IA del Pentágono omite los principios éticos previos, adoptando un lenguaje de "cualquier uso legal" en contratos de IA militar.</p>
+  <p><strong>Nivel de Riesgo:</strong> Crítico. La carrera por la "IA Soberana" (ejemplificada por el nuevo acuerdo entre Shield AI y ST Engineering en Singapur) está superando la capacidad de regulación internacional.</p>
+  
+  <h3>🔭 Radar de Eventos Críticos (Horizon Scanning)</h3>
+  <p><strong>Fecha (Aprox/Confirmada):</strong> 2 al 6 de marzo de 2026</p>
+  <p><strong>Evento Crítico:</strong> Primera sesión del Grupo de Expertos Gubernamentales (GGE) sobre LAWS en Ginebra.</p>
+  <p><strong>Por qué es Determinante:</strong> Es el plazo final para que los Estados decidan si el marco de la Convención sobre Ciertas Armas Convencionales (CCW) es capaz de producir un instrumento legalmente vinculante antes de la Conferencia de Revisión. Un fracaso aquí consolidará la IA como el regulador de facto de los conflictos futuros, fuera del control de la ONU.</p>
+  
+  <p><strong>Fecha (Confirmada):</strong> 24 de febrero de 2026</p>
+  <p><strong>Evento Crítico:</strong> Reunión ministerial del CSNU sobre el 4º aniversario de la guerra en Ucrania.</p>
+  <p><strong>Por qué es Determinante:</strong> Se espera un bloqueo total por veto, lo que podría ser el catalizador final para que el G4 (Brasil, Alemania, India, Japón) exija una votación de reforma estructural en la Asamblea General bajo la fórmula "Unidos por la Paz".</p>
+  
+  <h3>📉 Conclusión Diaria</h3>
+  <p><strong>DIAGNÓSTICO:</strong> La tendencia apunta hacia una <strong>disrupción forzada por la tecnología</strong>. Mientras la ONU lucha por su supervivencia financiera y política, los actores estatales están transfiriendo su seguridad a sistemas autónomos y alianzas tecnológicas unilaterales. La "parálisis política" ya no es solo un bloqueo de votos, sino una irrelevancia técnica frente a la velocidad de despliegue de la IA militar.</p>
+</div>
+            </div>
+        </div>
+        <!-- MR_REPORT_CARD_END -->
             <!-- MR_REPORTS_END -->
         </div>
     </div>
 </body>
-
 </html>
