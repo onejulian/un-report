@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,21 +7,14 @@
     <title>Monitor ONU - Inteligencia Geopolítica</title>
     <style>
         :root {
-            --bg-body: #0f172a;
-            /* Slate 900 */
-            --bg-card: #1e293b;
-            /* Slate 800 */
-            --text-main: #f1f5f9;
-            /* Slate 100 */
-            --text-muted: #94a3b8;
-            /* Slate 400 */
-            --border: #334155;
-            /* Slate 700 */
-            --accent: #38bdf8;
-            /* Sky 400 */
+            --bg-body: #0f172a;       /* Slate 900 */
+            --bg-card: #1e293b;       /* Slate 800 */
+            --text-main: #f1f5f9;     /* Slate 100 */
+            --text-muted: #94a3b8;    /* Slate 400 */
+            --border: #334155;        /* Slate 700 */
+            --accent: #38bdf8;        /* Sky 400 */
             --accent-glow: rgba(56, 189, 248, 0.15);
-            --success: #34d399;
-            /* Emerald 400 */
+            --success: #34d399;       /* Emerald 400 */
             --font-main: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
 
@@ -88,9 +80,7 @@
         .report-card::before {
             content: "";
             position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
+            left: 0; top: 0; bottom: 0;
             width: 4px;
             background: var(--accent);
             opacity: 0.8;
@@ -121,18 +111,11 @@
             display: flex;
             align-items: center;
         }
-
+        
         .content h3::before {
             content: "▹";
             margin-right: 8px;
             color: var(--accent);
-        }
-
-        .content h4 {
-            color: var(--text-main);
-            font-size: 1rem;
-            margin-top: 16px;
-            margin-bottom: 8px;
         }
 
         .content p {
@@ -141,59 +124,75 @@
         }
 
         .content strong {
-            color: var(--success);
-            /* Resalta datos clave en verde */
+            color: var(--success); /* Resalta datos clave en verde */
             font-weight: 600;
         }
-
+        
         /* Diagnóstico final destacado */
         .content p:last-child strong {
-            color: #fbbf24;
-            /* Amber para la conclusión */
+            color: #fbbf24; /* Amber para la conclusión */
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Mobile */
         @media (max-width: 600px) {
-            body {
-                padding: 12px;
-            }
-
-            .header h1 {
-                font-size: 1.5rem;
-            }
-
-            .report-card {
-                padding: 20px;
-                border-radius: 12px;
-            }
+            body { padding: 12px; }
+            .header h1 { font-size: 1.5rem; }
+            .report-card { padding: 20px; border-radius: 12px; }
         }
     </style>
 </head>
-
 <body>
     <div class="container">
         <div class="header">
             <h1>Monitor ONU 2026</h1>
-            <p>Análisis de Riesgos Geopolíticos & Tecnológicos Estratégicos</p>
+            <p>Análisis de Riesgos Geopolíticos &amp; Tecnológicos Estratégicos</p>
         </div>
-
+        
         <div id="archive">
             <!-- MR_REPORTS_START -->
+<!-- MR_REPORT_CARD_START -->
+        <div class="report-card">
+            <div class="timestamp">REPORTE GENERADO: 05-Feb-2026 11:40 UTC</div>
+            <div class="content">
+                <div class="report-section">
+  <h3>🚨 Resumen Ejecutivo (BLUF)</h3>
+  <p>La ONU inicia febrero de 2026 en un estado de parálisis operativa crítica: mientras el Consejo de Seguridad (CSNU) intenta reactivar agendas en Sudán y Gaza bajo presidencia británica, la ineficacia del veto ha reducido la producción legislativa global a mínimos históricos. El vacío de gobernanza está siendo llenado por una carrera armamentista en IA, con el plazo final para un tratado sobre armas autónomas (LAWS) expirando este año.</p>
+  
+  <h3>🔍 Análisis de las Últimas 24h</h3>
+  <h4>1. Termómetro Político (Consejo de Seguridad)</h4>
+  <p><strong>Evento:</strong> Consolidación del programa de trabajo de la presidencia del Reino Unido (febrero 2026) y anuncio de una sesión ministerial sobre Sudán y una reunión especial el 24 de febrero por el 4º aniversario de la guerra en Ucrania.</p>
+  <p><strong>Impacto:</strong> A pesar de los intentos por implementar el "Plan Integral para el Fin del Conflicto en Gaza", la parálisis estructural es evidente. Datos de 2025 confirman que el CSNU adoptó solo 44 resoluciones (el nivel más bajo desde 1991), con el poder de veto utilizado sistemáticamente por EE.UU. y Rusia para bloquear acciones sustantivas en los conflictos más letales.</p>
+  
+  <h4>2. Frente Humanitario</h4>
+  <p><strong>Estado:</strong> Situación Crítica / Colapso de Evacuaciones.</p>
+  <p><strong>Detalle:</strong> OCHA reporta que más de 18,000 pacientes en Gaza, incluidos 4,000 niños, están en riesgo inminente de muerte debido al bloqueo de corredores médicos. En Sudán del Sur, la violencia en Jonglei ha desplazado a 280,000 personas en las últimas semanas, superando la capacidad operativa de UNRWA y el PMA, quienes enfrentan una crisis de liquidez sin precedentes.</p>
+  
+  <h4>3. Vigilancia Tecnológica (El Catalizador)</h4>
+  <p><strong>Hallazgos:</strong> Se ha formalizado la agenda para la sesión de marzo del Grupo de Expertos Gubernamentales (GGE) sobre LAWS en Ginebra. El Secretario General ha reiterado el llamado a un tratado vinculante para finales de 2026, mientras que incidentes recientes con drones autónomos en la frontera de las Coreas subrayan que la tecnología ha superado la capacidad de regulación de la Convención sobre Ciertas Armas Convencionales (CCW).</p>
+  <p><strong>Nivel de Riesgo:</strong> Crítico.</p>
+  
+  <h3>🔭 Radar de Eventos Críticos (Horizon Scanning)</h3>
+  <p><strong>Fecha (Confirmada):</strong> 13 al 15 de febrero de 2026.</p>
+  <p><strong>Evento Crítico:</strong> Conferencia de Seguridad de Múnich (MSC 2026).</p>
+  <p><strong>Por qué es Determinante:</strong> Se espera que sea el foro donde se debata la propuesta de un "Board of Peace" alternativo a la ONU, lo que podría marcar el inicio formal de un orden de seguridad post-multilateralista liderado por potencias tecnológicas.</p>
+
+  <p><strong>Fecha (Confirmada):</strong> 2 al 6 de marzo de 2026.</p>
+  <p><strong>Evento Crítico:</strong> Primera Sesión del GGE sobre Armas Autónomas (LAWS) en Ginebra.</p>
+  <p><strong>Por qué es Determinante:</strong> Es el "punto de inflexión" legislativo. Si no se logra un borrador de texto de negociación, el mandato de la ONU sobre IA militar podría colapsar, dejando la regulación en manos de acuerdos bilaterales entre potencias de IA Soberana.</p>
+  
+  <h3>📉 Conclusión Diaria</h3>
+  <p><strong>DIAGNÓSTICO:</strong> La tendencia general apunta hacia una <strong>disrupción forzada por la tecnología</strong>. La incapacidad de reforma del CSNU (bloqueada por el grupo "Uniting for Consensus" frente al modelo de expansión del G4 presentado en enero) está trasladando el eje de la seguridad global desde los tratados diplomáticos hacia la superioridad algorítmica y las coaliciones tecnológicas ad-hoc.</p>
+</div>
+            </div>
+        </div>
+        <!-- MR_REPORT_CARD_END -->
             <!-- MR_REPORTS_END -->
         </div>
     </div>
 </body>
-
 </html>
