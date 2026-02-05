@@ -1,6 +1,7 @@
 import os
 import datetime
 import re
+import time
 from google import genai
 from google.genai import types
 
@@ -10,29 +11,32 @@ from google.genai import types
 MODEL_ID = "gemini-3-flash-preview" 
 
 # --- 1. SYSTEM PROMPT (La Personalidad y Reglas Rigurosas) ---
-SYS_INSTRUCT = """### ROLE
-Act as a Senior Macro-Quant Strategist specializing in G10 FX currencies, specifically EUR/USD. Your sole purpose is to explain the RIGOROUS CAUSALITY of current price action based on cross-asset correlation, macro data, and market structure. You do NOT predict future prices; you explain the "current state of truth."
+SYS_INSTRUCT = """# ROL
+Actúa como un Analista de Inteligencia Geopolítica y Riesgos Tecnológicos Estratégicos.
 
-### CORE DIRECTIVE: "RECENCY & RELEVANCE"
-You must strictly validate the timestamp of every piece of data you analyze.
-- Before citing a macro indicator (CPI, NFP, GDP), you must verify: Is this data from the last 24-48 hours? If it is older, it is "Stale Data" and serves only as context, not as an immediate catalyst.
-- You must explicitly contrast the "Hard Data" (numbers) with the "Market Narrative" (headlines).
+# CONTEXTO DE LA MISIÓN
+Estamos monitoreando una tesis específica sobre el estado del orden mundial en 2026:
+"La ONU sufre una parálisis política estructural debido al veto en el Consejo de Seguridad, volviéndose irrelevante para prevenir guerras, mientras que la Inteligencia Artificial y las armas autónomas emergen como los verdaderos catalizadores que forzarán un cambio de paradigma en la seguridad global".
 
-### ANALYSIS HIERARCHY (Order of Importance)
-1. **Bond Yield Spreads (The Truth):** Analyze the real-time spread between US 10Y Treasury and German Bund (10Y). Direction of spread = Direction of flow.
-2. **Central Bank Pricing (The Expectations):** What are Fed Fund Futures pricing in today vs. yesterday?
-3. **Risk Sentiment (The Mood):** Correlation with S&P 500 and VIX.
-4. **Calendar Validation (The Catalyst):** Check the Economic Calendar for High-Impact events released in the last 4 hours.
+# INSTRUCCIONES
+Utiliza Search para realizar dos tipos de investigación:
 
-### RULES FOR OUTPUT
-- **No Fluff:** Be concise, professional, and dense with information.
-- **Divergence Spotting:** If Price is rising but Bond Spreads are falling, you MUST highlight this as a "Divergence/Anomaly" caused likely by flows/positioning, not fundamentals.
-- **Missing Data:** If you cannot find real-time data for a specific metric, state "DATA UNAVAILABLE" rather than hallucinating a number.
-- **Language:** Spanish.
-- **Format:** Return ONLY raw HTML code for the report content (divs, h3, p, strong, ul). Do NOT use markdown blocks like ```html. Do NOT include <html> or <body> tags.
+1. **Monitoreo Reactivo (Últimas 24h):** Busca eventos, movimientos militares o resoluciones recientes que confirmen o refuten nuestra tesis.
+2. **Monitoreo Prospectivo (Horizon Scanning):** Busca fechas específicas de eventos futuros programados (Cumbres, votaciones del Consejo, plazos de grupos de trabajo sobre LAWS en Ginebra, lanzamientos de modelos de IA de defensa) que tengan el potencial de ser "Puntos de Inflexión".
+
+Debes investigar específicamente estos 4 PILARES:
+1. **Parálisis vs. Acción en el CSNU:** (Vetos, bloqueos, unilateralismo).
+2. **Estado de la "Sala de Emergencias" (Humanitario):** (Situación operativa de UNRWA, OCHA, PMA).
+3. **El Catalizador Tecnológico (IA y Armas Autónomas):** (Avances en IA Soberana, incidentes con drones autónomos, regulación).
+4. **Señales de Reforma:** (Movimientos del G4, Pacto del Futuro).
+
+# REGLAS DE SALIDA
+- **Lenguaje:** Español.
+- **Formato:** Devuelve ÚNICAMENTE código HTML puro para el contenido del reporte (divs, h3, p, strong, ul). NO uses bloques markdown como ```html. NO incluyas etiquetas <html> o <body>.
+- **Precisión:** Si no puedes encontrar datos recientes para una métrica específica, declara "DATOS NO DISPONIBLES" en lugar de inventar información.
 """
 
-def get_gemini_analysis():
+def get_gemini_analysis(previous_report=None):
     # Recomendado: exporta tu key en el entorno para no hardcodearla en el repo.
     # - Windows (PowerShell): $env:GOOGLE_API_KEY="..."
     # - Git Bash: export GOOGLE_API_KEY="..."
@@ -44,38 +48,71 @@ def get_gemini_analysis():
     
     # Fecha exacta para evitar alucinaciones temporales
     now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M UTC")
-
-    # --- 2. USER TASK (La Instrucción de Ejecución cada 4h) ---
-    query = f"""
-    CURRENT TIME: {now_str}
     
-    **TASK: Ejecuta el reporte de causalidad para EUR/USD.**
+    # Preparar contexto del reporte anterior si existe
+    previous_context = ""
+    if previous_report:
+        previous_context = f"""
+    
+    --- CONTEXTO: REPORTE DEL DÍA ANTERIOR ---
+    A continuación se encuentra el reporte generado el día anterior. Úsalo como referencia para:
+    1. Identificar si hay evolución o cambios significativos en los 4 pilares.
+    2. Mencionar explícitamente cualquier evento que se haya materializado o resuelto.
+    3. Actualizar el nivel de riesgo si ha cambiado.
+    
+    REPORTE ANTERIOR:
+    {previous_report}
+    
+    IMPORTANTE: Si detectas cambios relevantes, inclúyelos en tu análisis de forma natural (no crees una sección separada de "comparación", simplemente menciona el contexto cuando sea relevante, ej: "A diferencia de ayer...", "Como se anticipó en el reporte previo...", "La situación ha escalado desde...").
+    --- FIN DEL CONTEXTO ANTERIOR ---
+    """
+
+    # --- 2. USER TASK (La Instrucción de Ejecución cada 24h) ---
+    query = f"""
+    CURRENT TIME: {now_str}{previous_context}
+    
+    **TASK: Ejecuta el Informe de Situación Geopolítica y Riesgos Tecnológicos.**
     
     Sigue estrictamente estos pasos de investigación usando Google Search:
 
-    PASO 1: Validación de Datos Macro (Recencia)
-    - Busca noticias "High Impact Forex News" de las últimas 6 horas.
-    - Confirma fecha y hora. Si no hay, declara "CONTEXTO VACÍO".
+    PASO 1: Monitoreo Reactivo (Últimas 24h)
+    - Pilar 1: Busca "UN Security Council veto" OR "UNSC resolution blocked" de las últimas 24 horas.
+    - Pilar 2: Busca "UNRWA operations" OR "OCHA humanitarian" OR "WFP crisis" de las últimas 24 horas.
+    - Pilar 3: Busca "autonomous weapons" OR "military AI" OR "LAWS Geneva" de las últimas 24 horas.
+    - Pilar 4: Busca "UN reform" OR "G4 Security Council" OR "Summit of the Future" de las últimas 24 horas.
 
-    PASO 2: Rastreo de Flujo de Dinero (Bonos y Acciones)
-    - Busca el rendimiento actual (yield) del "US 10 Year Treasury Note" y "Germany 10 Year Bund".
-    - Busca "S&P 500 futures price" y "VIX index now".
-
-    PASO 3: Análisis de Narrativa
-    - Busca titulares recientes en Bloomberg/Reuters sobre EUR/USD.
+    PASO 2: Monitoreo Prospectivo (Horizon Scanning)
+    - Busca fechas confirmadas de próximas reuniones del Consejo de Seguridad.
+    - Busca plazos de grupos de trabajo sobre armas autónomas en Ginebra.
+    - Busca fechas de cumbres internacionales sobre reforma de la ONU.
     
     OUTPUT FORMAT (HTML puro):
     <div class="report-section">
-      <h3>1. Estado del Conductor (Bonos)</h3>
-      <p>[Tu análisis del spread aquí]</p>
+      <h3>🚨 Resumen Ejecutivo (BLUF)</h3>
+      <p>[Síntesis de 3 líneas sobre la evolución del riesgo hoy]</p>
       
-      <h3>2. Datos Recientes y Narrativa</h3>
-      <p>[Tu validación de noticias]</p>
+      <h3>🔍 Análisis de las Últimas 24h</h3>
+      <h4>1. Termómetro Político (Consejo de Seguridad)</h4>
+      <p><strong>Evento:</strong> [Hecho concreto]</p>
+      <p><strong>Impacto:</strong> [Análisis]</p>
       
-      <h3>3. Conclusión Causal Rigurosa</h3>
-      <p><strong>DIAGNÓSTICO:</strong> [Tu síntesis final]</p>
+      <h4>2. Frente Humanitario</h4>
+      <p><strong>Estado:</strong> [Situación crítica / Estable]</p>
+      
+      <h4>3. Vigilancia Tecnológica (El Catalizador)</h4>
+      <p><strong>Hallazgos:</strong> [Nuevos desarrollos]</p>
+      <p><strong>Nivel de Riesgo:</strong> [Bajo / Medio / Crítico]</p>
+      
+      <h3>🔭 Radar de Eventos Críticos (Horizon Scanning)</h3>
+      <p><strong>Fecha (Aprox/Confirmada):</strong> [Ej: "Próximo martes", "Marzo 2026", "Sin fecha definida aún"]</p>
+      <p><strong>Evento Crítico:</strong> [Nombre de la Cumbre, Votación o Deadline]</p>
+      <p><strong>Por qué es Determinante:</strong> [Explica brevemente qué cambio estructural podría desencadenar este evento específico. Si no hay eventos críticos próximos, indica "No se detectan hitos estratégicos inmediatos".]</p>
+      
+      <h3>📉 Conclusión Diaria</h3>
+      <p><strong>DIAGNÓSTICO:</strong> [¿La tendencia general apunta hacia una reforma pacífica o hacia una disrupción forzada por la tecnología?]</p>
     </div>
     """
+
 
     # Configuración con Herramienta de Búsqueda
     tools = [types.Tool(google_search=types.GoogleSearch())]
@@ -90,22 +127,53 @@ def get_gemini_analysis():
     full_response = ""
     print(">>> Iniciando contacto con Gemini (Estratega Macro)...")
     
-    # Llamada al modelo
-    for chunk in client.models.generate_content_stream(
-        model=MODEL_ID,
-        contents=[types.Content(role="user", parts=[types.Part.from_text(text=query)])],
-        config=generate_content_config,
-    ):
-        if chunk.text:
-            full_response += chunk.text
-            print(".", end="", flush=True) # Feedback visual de carga
+    # Mecanismo de reintentos para errores 503
+    MAX_ATTEMPTS = 2
+    RETRY_DELAY = 30  # segundos
+    
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        try:
+            # Llamada al modelo
+            for chunk in client.models.generate_content_stream(
+                model=MODEL_ID,
+                contents=[types.Content(role="user", parts=[types.Part.from_text(text=query)])],
+                config=generate_content_config,
+            ):
+                if chunk.text:
+                    full_response += chunk.text
+                    print(".", end="", flush=True)  # Feedback visual de carga
             
-    print("\n>>> Análisis completado.")
-    return full_response
+            # Si llegamos aquí, la llamada fue exitosa
+            print("\n>>> Análisis completado.")
+            return full_response
+            
+        except Exception as e:
+            # Verificar si es un error 503
+            error_message = str(e)
+            is_503_error = "503" in error_message or "Service Unavailable" in error_message
+            
+            if is_503_error and attempt < MAX_ATTEMPTS:
+                print(f"\n⚠ Error 503 detectado (Intento {attempt}/{MAX_ATTEMPTS})")
+                print(f">>> Esperando {RETRY_DELAY} segundos antes de reintentar...")
+                time.sleep(RETRY_DELAY)
+                print(f">>> Reintentando (Intento {attempt + 1}/{MAX_ATTEMPTS})...")
+                full_response = ""  # Limpiar la respuesta para el reintento
+            elif is_503_error and attempt == MAX_ATTEMPTS:
+                print(f"\n❌ Error 503 persistente después de {MAX_ATTEMPTS} intentos.")
+                print(">>> Terminando ejecución para evitar costos en GitHub Actions.")
+                raise Exception(f"API de Gemini no disponible después de {MAX_ATTEMPTS} intentos (Error 503)")
+            else:
+                # Si es otro tipo de error, lanzarlo inmediatamente
+                raise
+
+def get_current_year():
+    """Obtiene el año actual del servidor."""
+    return datetime.datetime.now().year
 
 def update_html(new_report_content):
     filename = "index.html"
     now_display = datetime.datetime.now().strftime("%d-%b-%Y %H:%M UTC")
+    current_year = get_current_year()
 
     REPORTS_START = "<!-- MR_REPORTS_START -->"
     REPORTS_END = "<!-- MR_REPORTS_END -->"
@@ -114,15 +182,15 @@ def update_html(new_report_content):
     MAX_REPORTS = 10
 
     # --- NUEVO DISEÑO: Dashboard Financiero Dark Mode ---
-    base_html = """<!DOCTYPE html>
+    base_html = f"""<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0f172a">
-    <title>EUR/USD Macro Monitor</title>
+    <title>Monitor ONU - Inteligencia Geopolítica</title>
     <style>
-        :root {
+        :root {{
             --bg-body: #0f172a;       /* Slate 900 */
             --bg-card: #1e293b;       /* Slate 800 */
             --text-main: #f1f5f9;     /* Slate 100 */
@@ -132,9 +200,9 @@ def update_html(new_report_content):
             --accent-glow: rgba(56, 189, 248, 0.15);
             --success: #34d399;       /* Emerald 400 */
             --font-main: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-        }
+        }}
 
-        body {
+        body {{
             font-family: var(--font-main);
             background-color: var(--bg-body);
             color: var(--text-main);
@@ -142,22 +210,22 @@ def update_html(new_report_content):
             padding: 20px;
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
-        }
+        }}
 
-        .container {
+        .container {{
             max-width: 850px;
             margin: 0 auto;
-        }
+        }}
 
-        .header {
+        .header {{
             text-align: center;
             margin-bottom: 40px;
             padding-bottom: 25px;
             border-bottom: 1px solid var(--border);
             animation: fadeIn 0.8s ease-out;
-        }
+        }}
 
-        .header h1 {
+        .header h1 {{
             margin: 0 0 10px 0;
             font-size: 2rem;
             font-weight: 700;
@@ -165,16 +233,16 @@ def update_html(new_report_content):
             background: linear-gradient(to right, #fff, #cbd5e1);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-        }
+        }}
 
-        .header p {
+        .header p {{
             margin: 0;
             color: var(--text-muted);
             font-size: 0.95rem;
-        }
+        }}
 
         /* Tarjetas de Reporte */
-        .report-card {
+        .report-card {{
             background-color: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 16px;
@@ -184,25 +252,25 @@ def update_html(new_report_content):
             position: relative;
             overflow: hidden;
             transition: transform 0.2s, box-shadow 0.2s;
-        }
+        }}
 
-        .report-card:hover {
+        .report-card:hover {{
             transform: translateY(-2px);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
             border-color: var(--accent);
-        }
+        }}
 
         /* Borde lateral de acento */
-        .report-card::before {
+        .report-card::before {{
             content: "";
             position: absolute;
             left: 0; top: 0; bottom: 0;
             width: 4px;
             background: var(--accent);
             opacity: 0.8;
-        }
+        }}
 
-        .timestamp {
+        .timestamp {{
             display: inline-block;
             font-size: 0.75rem;
             font-weight: 700;
@@ -214,10 +282,10 @@ def update_html(new_report_content):
             border-radius: 99px;
             margin-bottom: 20px;
             border: 1px solid rgba(56, 189, 248, 0.2);
-        }
+        }}
 
         /* Estilos del contenido generado */
-        .content h3 {
+        .content h3 {{
             color: var(--text-main);
             font-size: 1.1rem;
             margin-top: 24px;
@@ -226,47 +294,47 @@ def update_html(new_report_content):
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
-        }
+        }}
         
-        .content h3::before {
+        .content h3::before {{
             content: "▹";
             margin-right: 8px;
             color: var(--accent);
-        }
+        }}
 
-        .content p {
+        .content p {{
             color: var(--text-muted);
             margin-bottom: 16px;
-        }
+        }}
 
-        .content strong {
+        .content strong {{
             color: var(--success); /* Resalta datos clave en verde */
             font-weight: 600;
-        }
+        }}
         
         /* Diagnóstico final destacado */
-        .content p:last-child strong {
+        .content p:last-child strong {{
             color: #fbbf24; /* Amber para la conclusión */
-        }
+        }}
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeIn {{
+            from {{ opacity: 0; transform: translateY(10px); }}
+            to {{ opacity: 1; transform: translateY(0); }}
+        }}
 
         /* Mobile */
-        @media (max-width: 600px) {
-            body { padding: 12px; }
-            .header h1 { font-size: 1.5rem; }
-            .report-card { padding: 20px; border-radius: 12px; }
-        }
+        @media (max-width: 600px) {{
+            body {{ padding: 12px; }}
+            .header h1 {{ font-size: 1.5rem; }}
+            .report-card {{ padding: 20px; border-radius: 12px; }}
+        }}
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>EUR/USD Algorithmic Causality</h1>
-            <p>Monitor de Estructura de Mercado & Flujos en Tiempo Real</p>
+            <h1>Monitor ONU {current_year}</h1>
+            <p>Análisis de Riesgos Geopolíticos &amp; Tecnológicos Estratégicos</p>
         </div>
         
         <div id="archive">
@@ -321,9 +389,64 @@ def update_html(new_report_content):
     with open(filename, "w", encoding="utf-8") as f:
         f.write(final_html)
 
+def extract_previous_report():
+    """Extrae el contenido del reporte más reciente del HTML."""
+    filename = "index.html"
+    if not os.path.exists(filename):
+        return None
+    
+    try:
+        with open(filename, "r", encoding="utf-8") as f:
+            content = f.read()
+        
+        # Buscar el primer report-card (el más reciente)
+        CARD_START = "<!-- MR_REPORT_CARD_START -->"
+        CARD_END = "<!-- MR_REPORT_CARD_END -->"
+        
+        start_idx = content.find(CARD_START)
+        if start_idx == -1:
+            return None
+        
+        end_idx = content.find(CARD_END, start_idx)
+        if end_idx == -1:
+            return None
+        
+        # Extraer el bloque completo
+        card_block = content[start_idx:end_idx + len(CARD_END)]
+        
+        # Extraer solo el contenido dentro de <div class="content">
+        content_start = card_block.find('<div class="content">')
+        if content_start == -1:
+            return None
+        
+        content_end = card_block.rfind('</div>', content_start)
+        if content_end == -1:
+            return None
+        
+        # Extraer el contenido HTML puro (sin las etiquetas de contenedor)
+        previous_content = card_block[content_start + len('<div class="content">'):content_end].strip()
+        
+        # También extraer el timestamp para referencia
+        timestamp_match = re.search(r'<div class="timestamp">REPORTE GENERADO: ([^<]+)</div>', card_block)
+        timestamp = timestamp_match.group(1) if timestamp_match else "Fecha desconocida"
+        
+        return f"[Timestamp: {timestamp}]\n{previous_content}"
+        
+    except Exception as e:
+        print(f"⚠ Advertencia: No se pudo extraer el reporte anterior: {e}")
+        return None
+
 if __name__ == "__main__":
     try:
-        report = get_gemini_analysis()
+        # Extraer el reporte del día anterior si existe
+        previous_report = extract_previous_report()
+        if previous_report:
+            print(">>> Reporte anterior encontrado. Se usará como contexto para comparación.")
+        else:
+            print(">>> No se encontró reporte anterior. Generando primer reporte.")
+        
+        # Generar nuevo reporte con contexto del anterior
+        report = get_gemini_analysis(previous_report=previous_report)
         update_html(report)
         print("SUCCESS: HTML actualizado correctamente.")
     except Exception as e:
