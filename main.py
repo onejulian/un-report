@@ -8,7 +8,7 @@ from google.genai import types
 # --- CONFIGURACIÓN ---
 # Usamos el modelo experimental más capaz para razonamiento. 
 # Si te da error de acceso, cambia a "gemini-1.5-pro-latest"
-MODEL_ID = "gemini-3-flash-preview" 
+MODEL_ID = "gemini-3.1-pro-preview" 
 
 # --- 1. SYSTEM PROMPT (La Personalidad y Reglas Rigurosas) ---
 SYS_INSTRUCT = """# ROL
