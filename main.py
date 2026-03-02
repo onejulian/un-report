@@ -2,13 +2,15 @@ import os
 import datetime
 import re
 import time
+import concurrent.futures
 from google import genai
 from google.genai import types
 
 # --- CONFIGURACIÓN ---
 # Usamos el modelo experimental más capaz para razonamiento. 
 # Si te da error de acceso, cambia a "gemini-1.5-pro-latest"
-MODEL_ID = "gemini-3.1-pro-preview" 
+MODEL_ID = "gemini-3.1-pro-preview"
+MODEL_ID_FALLBACK = "gemini-3-pro-preview"
 
 # --- 1. SYSTEM PROMPT (La Personalidad y Reglas Rigurosas) ---
 SYS_INSTRUCT = """# ROL
@@ -41,6 +43,8 @@ def get_gemini_analysis(previous_report=None):
     # - Windows (PowerShell): $env:GOOGLE_API_KEY="..."
     # - Git Bash: export GOOGLE_API_KEY="..."
     api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or ""
+    # api_key = ""
+    
     if not api_key:
         raise ValueError("Falta la API key. Define GEMINI_API_KEY o GOOGLE_API_KEY en las variables de entorno.")
 
@@ -124,47 +128,70 @@ def get_gemini_analysis(previous_report=None):
         temperature=0.3 
     )
 
-    full_response = ""
-    print(">>> Iniciando contacto con Gemini (Estratega Macro)...")
-    
-    # Mecanismo de reintentos para errores 503
-    MAX_ATTEMPTS = 2
+    CALL_TIMEOUT = 120  # segundos máximos esperando respuesta de la API
+
+    def _stream_model(model_id):
+        """Llama al modelo de forma bloqueante; se ejecuta dentro de un hilo."""
+        response = ""
+        for chunk in client.models.generate_content_stream(
+            model=model_id,
+            contents=[types.Content(role="user", parts=[types.Part.from_text(text=query)])],
+            config=generate_content_config,
+        ):
+            if chunk.text:
+                response += chunk.text
+                print(".", end="", flush=True)  # Feedback visual de carga
+        return response
+
+    def _call_model(model_id):
+        """Ejecuta _stream_model en un hilo y lanza TimeoutError si supera CALL_TIMEOUT."""
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(_stream_model, model_id)
+            try:
+                return future.result(timeout=CALL_TIMEOUT)
+            except concurrent.futures.TimeoutError:
+                raise TimeoutError(
+                    f"La API no respondió en {CALL_TIMEOUT}s (modelo: {model_id})"
+                )
+
+    # Secuencia de intentos: 2 con el modelo principal + 1 con el fallback
     RETRY_DELAY = 30  # segundos
-    
-    for attempt in range(1, MAX_ATTEMPTS + 1):
+    attempts = [
+        (1, MODEL_ID,          "principal"),
+        (2, MODEL_ID,          "principal"),
+        (3, MODEL_ID_FALLBACK, "fallback"),
+        (4, MODEL_ID_FALLBACK, "fallback"),
+    ]
+
+    print(">>>> Iniciando contacto con Gemini (Estratega Macro)...")
+
+    for attempt, model_id, model_label in attempts:
+        total = len(attempts)
         try:
-            # Llamada al modelo
-            for chunk in client.models.generate_content_stream(
-                model=MODEL_ID,
-                contents=[types.Content(role="user", parts=[types.Part.from_text(text=query)])],
-                config=generate_content_config,
-            ):
-                if chunk.text:
-                    full_response += chunk.text
-                    print(".", end="", flush=True)  # Feedback visual de carga
-            
-            # Si llegamos aquí, la llamada fue exitosa
+            result = _call_model(model_id)
             print("\n>>> Análisis completado.")
-            return full_response
-            
+            return result
+
         except Exception as e:
-            # Verificar si es un error 503
             error_message = str(e)
             is_503_error = "503" in error_message or "Service Unavailable" in error_message
-            
-            if is_503_error and attempt < MAX_ATTEMPTS:
-                print(f"\n⚠ Error 503 detectado (Intento {attempt}/{MAX_ATTEMPTS})")
-                print(f">>> Esperando {RETRY_DELAY} segundos antes de reintentar...")
-                time.sleep(RETRY_DELAY)
-                print(f">>> Reintentando (Intento {attempt + 1}/{MAX_ATTEMPTS})...")
-                full_response = ""  # Limpiar la respuesta para el reintento
-            elif is_503_error and attempt == MAX_ATTEMPTS:
-                print(f"\n❌ Error 503 persistente después de {MAX_ATTEMPTS} intentos.")
-                print(">>> Terminando ejecución para evitar costos en GitHub Actions.")
-                raise Exception(f"API de Gemini no disponible después de {MAX_ATTEMPTS} intentos (Error 503)")
-            else:
-                # Si es otro tipo de error, lanzarlo inmediatamente
+            is_timeout  = isinstance(e, TimeoutError)
+
+            if not is_503_error and not is_timeout:
+                # Cualquier error distinto a 503/timeout se lanza inmediatamente
                 raise
+
+            if attempt < total:
+                next_model_label = attempts[attempt][2]  # label del siguiente intento
+                reason = f"Timeout ({CALL_TIMEOUT}s)" if is_timeout else "Error 503"
+                print(f"\n⚠ {reason} en modelo {model_label} (Intento {attempt}/{total})")
+                print(f">>> Esperando {RETRY_DELAY}s antes de reintentar con modelo {next_model_label}...")
+                time.sleep(RETRY_DELAY)
+            else:
+                reason = f"timeout ({CALL_TIMEOUT}s)" if is_timeout else "Error 503"
+                print(f"\n❌ {reason} persistente en todos los modelos ({total} intentos).")
+                print(">>> Terminando ejecución para evitar costos en GitHub Actions.")
+                raise Exception(f"API de Gemini no disponible después de {total} intentos ({reason})")
 
 def get_current_year():
     """Obtiene el año actual del servidor."""
